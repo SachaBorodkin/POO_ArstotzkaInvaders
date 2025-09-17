@@ -36,10 +36,40 @@ namespace Drones
             string imagePath = Path.GetFullPath(
                 Path.Combine(baseDir, @"..\..\..\resources\sky.png"));
             _background = Image.FromFile(imagePath);
-            this.BackgroundImageLayout = ImageLayout.Stretch; ;
+
+            // Remove BackgroundImageLayout
+            this.BackgroundImage = null;
+
+            // Handle Paint event
+            this.Paint += Form1_Paint;
+            this.Resize += (s, e) => this.Invalidate(); // Redraw on resize
 
         }
+        private void Form1_Paint(object sender, PaintEventArgs e)
+        {
+            if (_background == null) return;
 
+            Rectangle destRect;
+            float imgRatio = (float)_background.Width / _background.Height;
+            float formRatio = (float)this.ClientSize.Width / this.ClientSize.Height;
+
+            if (formRatio > imgRatio)
+            {
+                int newHeight = this.ClientSize.Height;
+                int newWidth = (int)(imgRatio * newHeight);
+                int x = (this.ClientSize.Width - newWidth) / 2;
+                destRect = new Rectangle(x, 0, newWidth, newHeight);
+            }
+            else
+            {
+                int newWidth = this.ClientSize.Width;
+                int newHeight = (int)(newWidth / imgRatio);
+                int y = (this.ClientSize.Height - newHeight) / 2;
+                destRect = new Rectangle(0, y, newWidth, newHeight);
+            }
+
+            e.Graphics.DrawImage(_background, destRect);
+        }
         // Affichage de la situation actuelle
 
         public void Render()
@@ -72,11 +102,7 @@ namespace Drones
                 case Keys.Up:
                     foreach (Drone drone in fleet)
                     {
-                        if (drone.X < 0 || drone.X > 600)
-                        {
-                            drone.setY(drone.Y + 0);
-                        }
-                        else
+                        if (drone.Y > 0)
                             drone.setY(drone.Y - 10);
                     }
                     break;
@@ -85,25 +111,16 @@ namespace Drones
                 case Keys.Down:
                     foreach (Drone drone in fleet)
                     {
-                        if (drone.Y < 0 || drone.X > 600)
-                        {
-                            drone.setY(drone.Y + 0);
-                        }
-                        else
+                        if (drone.Y < 600)
                             drone.setY(drone.Y + 10);
                     }
                     break;
 
                 case Keys.A:
                 case Keys.Left:
-
                     foreach (Drone drone in fleet)
                     {
-                        if (drone.X < 0 || drone.X > 1200)
-                        {
-                            drone.setX(drone.X + 0);
-                        }
-                        else
+                        if (drone.X > 0)
                             drone.setX(drone.X - 10);
                     }
                     break;
@@ -112,15 +129,11 @@ namespace Drones
                 case Keys.Right:
                     foreach (Drone drone in fleet)
                     {
-                        if (drone.X <= 0 || drone.X >= 1200)
-                        {
-                            drone.setX(drone.X + 0);
-                        }   
-                        else
-                        drone.setX(drone.X + 10);
-                        
+                        if (drone.X < 1200)
+                            drone.setX(drone.X + 10);
                     }
                     break;
+
             }
 
         }
