@@ -7,17 +7,20 @@ namespace Drones
 
         private int _x;                                 // Position en X depuis la gauche de l'espace aérien
         private int _y;                                 // Position en Y depuis le haut de l'espace aérien
-
+        private int _charge;                        // Quantité des missiles 
         // Constructeur
-        public Drone(int x, int y)
+        public Drone(int x, int y, int charge)
         {
             _x = x;
             _y = y;
+            _charge = charge;
         }
         public int X { get { return _x; }  }
         public int Y { get { return _y;}  }
         public void setX(int x) { _x = x; }
         public void setY(int y) { _y = y; }
+        public int Charge { get {return _charge; } }  
+        public void setCharge(int charge) {  _charge = charge; }
         // Cette méthode calcule le nouvel état dans lequel le drone se trouve après
         // que 'interval' millisecondes se sont écoulées
         public void Update(int interval)
