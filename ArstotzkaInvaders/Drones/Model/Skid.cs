@@ -9,7 +9,7 @@ namespace Drones
 {
     public partial class Skid
     {
-        private static readonly Image _skidImage;
+        public static readonly Image _skidImage;
 
         static Skid()
         {

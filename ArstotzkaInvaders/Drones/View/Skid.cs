@@ -1,6 +1,7 @@
 ﻿using Drones;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Drones
     }
     public class Explosion
       {
+      
         private static readonly Image _ExplosionImage;
 
         static Explosion()
@@ -56,7 +58,7 @@ namespace Drones
                 drawingSpace.Graphics.DrawImage(_ExplosionImage, x - 80, y - 100, 170, 160);
 
 
-            }
+           }
         }
     }
 }

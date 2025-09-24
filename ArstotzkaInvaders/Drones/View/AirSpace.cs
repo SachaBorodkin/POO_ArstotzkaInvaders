@@ -104,6 +104,7 @@ namespace Drones
             {
                 explosion.Render(airspace);
             }
+            RenderSkidCount(airspace.Graphics);
             airspace.Render();
         }
 
@@ -155,6 +156,35 @@ namespace Drones
             }
 
             this.Render();
+        }
+        private void RenderSkidCount(Graphics g)
+        {
+
+            if (Skid._skidImage == null) return;
+
+            // Sum all remaining charges from drones (or pick the main drone)
+            int remaining = 0;
+            foreach (var drone in fleet)
+            {
+                remaining += drone.Charge; // remaining skids
+            }
+
+            int iconWidth = Skid._skidImage.Width;
+            int iconHeight = Skid._skidImage.Height;
+
+            // Top-center position
+            int x = (this.ClientSize.Width - iconWidth) / 2;
+            int y = 10;
+
+            // Draw skid icon
+            g.DrawImage(Skid._skidImage, x, y, 100, 50);
+
+            // Draw remaining count
+            using (Font font = new Font("Arial", 16, FontStyle.Bold))
+            using (Brush brush = new SolidBrush(Color.White))
+            {
+                g.DrawString($"x {remaining}", font, brush, x + 100 + 5, y + (50 - 16) / 2);
+            }
         }
         // Calcul du nouvel état après que 'interval' millisecondes se sont écoulées
         private void Update(int interval)
