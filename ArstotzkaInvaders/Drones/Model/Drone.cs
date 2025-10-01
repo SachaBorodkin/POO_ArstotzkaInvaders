@@ -15,6 +15,10 @@ namespace Drones
             _y = y;
             _charge = charge;
         }
+        public Rectangle GetBounds()
+        {
+            return new Rectangle(X, Y, 130, 90);
+        }
         public int X { get { return _x; }  }
         public int Y { get { return _y;}  }
         public void setX(int x) { _x = x; }

@@ -44,5 +44,9 @@ namespace Drones
 
             
         }
+        public Rectangle GetBounds()
+        {
+            return new Rectangle(X, Y, 35, 30);
+        }
     }
 }

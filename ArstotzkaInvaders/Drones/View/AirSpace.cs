@@ -19,11 +19,13 @@ namespace Drones
         private List<Drone> fleet;
         private List<Skid> skids = new List<Skid>();
         private List<Explosion> explosions = new List<Explosion>();
+        private List<BazaAzova> bases = new List<BazaAzova>();
         BufferedGraphicsContext currentContext;
         BufferedGraphics airspace;
-
+        private Image _gameOverImage; 
+        private bool _gameOver = false; 
         // Initialisation de l'espace aérien avec un certain nombre de drones
-        public AirSpace(List<Drone> fleet)
+        public AirSpace(List<Drone> fleet, List<BazaAzova> bases)
         {
             InitializeComponent();
 
@@ -33,6 +35,7 @@ namespace Drones
             this.fleet = fleet;
             this.skids = new List<Skid>();
             this.explosions = new List<Explosion>();
+            this.bases = bases;
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
@@ -100,11 +103,23 @@ namespace Drones
             {
                 skid.Render(airspace);
             }
+            foreach (BazaAzova baze in bases)
+            {
+                baze.Render(airspace);
+            }
             foreach (Explosion explosion in explosions)
             {
                 explosion.Render(airspace);
             }
             RenderSkidCount(airspace.Graphics);
+            RenderHPCount(airspace.Graphics);
+            if (_gameOver && _gameOverImage != null)
+            {
+                int x = (this.ClientSize.Width - 900) / 2;
+                int y = (this.ClientSize.Height - 200) / 2;
+                airspace.Graphics.DrawImage(_gameOverImage, x, y, 900, 200);
+            }
+
             airspace.Render();
         }
 
@@ -153,73 +168,130 @@ namespace Drones
                         drone.setCharge(drone.Charge - 1);
                     }
                 }
-            }
+            } 
 
             this.Render();
         }
+        private void RenderHPCount(Graphics g)
+        {
+            if (BazaAzova._hpTexture == null) return;
+
+            int remaining = 0;
+            foreach (var baza in bases)
+            {
+                remaining += baza.HP;
+            }
+
+            int iconWidth = 50;
+            int iconHeight = 50;
+
+            int spacing = 5;
+            int totalWidth = remaining * (iconWidth + spacing) - spacing;
+            int startX = 10;
+            int y = 10;
+
+
+            for (int i = 0; i < remaining; i++)
+            {
+                int x = startX + i * (iconWidth + spacing);
+                g.DrawImage(BazaAzova._hpTexture, x, y, iconWidth, iconHeight);
+            }
+        }
         private void RenderSkidCount(Graphics g)
         {
-
             if (Skid._skidImage == null) return;
 
-            // Sum all remaining charges from drones (or pick the main drone)
             int remaining = 0;
             foreach (var drone in fleet)
             {
-                remaining += drone.Charge; // remaining skids
+                remaining += drone.Charge;
             }
 
-            int iconWidth = Skid._skidImage.Width;
-            int iconHeight = Skid._skidImage.Height;
+            int iconWidth = 70;
+            int iconHeight = 50;
 
-            // Top-center position
-            int x = (this.ClientSize.Width - iconWidth) / 2;
+            int spacing = 5; 
+            int totalWidth = remaining * (iconWidth + spacing) - spacing;
+            int startX = (this.ClientSize.Width - totalWidth) / 2;
             int y = 10;
 
-            // Draw skid icon
-            g.DrawImage(Skid._skidImage, x, y, 100, 50);
-
-            // Draw remaining count
-            using (Font font = new Font("Arial", 16, FontStyle.Bold))
-            using (Brush brush = new SolidBrush(Color.White))
+        
+            for (int i = 0; i < remaining; i++)
             {
-                g.DrawString($"x {remaining}", font, brush, x + 100 + 5, y + (50 - 16) / 2);
+                int x = startX + i * (iconWidth + spacing);
+                g.DrawImage(Skid._skidImage, x, y, iconWidth, iconHeight);
             }
         }
         // Calcul du nouvel état après que 'interval' millisecondes se sont écoulées
         private void Update(int interval)
         {
+
+            foreach (BazaAzova baza in bases)
+            {
+                baza.Update(interval);
+            }
             foreach (Drone drone in fleet)
             {
                 drone.Update(interval);
+                foreach (var baseAzov in bases)
+                {
+                    if (drone.GetBounds().IntersectsWith(baseAzov.GetBounds()))
+                    {
+                        drone.setCharge(3);
+                    }
+
+                }
             }
+
             for (int i = skids.Count - 1; i >= 0; i--)
             {
                 skids[i].Update(interval);
+                bool skidRemoved = false;
 
-                if (skids[i].Y >= 550)
+                foreach (var baza in bases)
                 {
-                    
-                    var explosion = new Explosion(skids[i].X, skids[i].Y);
-                    explosions.Add(explosion);
-
-                 
-                    skids.RemoveAt(i);
-
-                    
-                    var explosionTimer = new System.Windows.Forms.Timer();
-                    explosionTimer.Interval = 500;
-                    explosionTimer.Tick += (s, args) =>
+                    if (skids[i].GetBounds().IntersectsWith(baza.GetBounds()))
                     {
-                        explosions.Remove(explosion);
-                        explosionTimer.Stop();
-                        explosionTimer.Dispose();
-                    };
-                    explosionTimer.Start();
+                        baza.setHP(baza.HP - 1);
+
+                        var explosion = new Explosion(skids[i].X, skids[i].Y);
+                        explosions.Add(explosion);
+
+                        var explosionTimer = new System.Windows.Forms.Timer();
+                        explosionTimer.Interval = 500;
+                        explosionTimer.Tick += (s, args) =>
+                        {
+                            explosions.Remove(explosion);
+                            explosionTimer.Stop();
+                            explosionTimer.Dispose();
+                        };
+                        explosionTimer.Start();
+
+                        skids.RemoveAt(i);
+                        skidRemoved = true;
+
+                        if (baza.HP <= 0)
+                        {
+                            ShowGameOver();
+                        }
+
+                        break;
+                    }
                 }
+
             }
         }
        
+        private void ShowGameOver()
+        {
+            ticker.Stop();
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string gameOverPath = Path.Combine(baseDir, @"..\..\..\resources\gameover.png");
+            _gameOverImage = Image.FromFile(gameOverPath);
+            _gameOver = true;
+
+
+        }
         // Méthode appelée à chaque frame
         private void NewFrame(object sender, EventArgs e)
         {

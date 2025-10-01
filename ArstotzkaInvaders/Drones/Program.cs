@@ -16,11 +16,13 @@ namespace Drones
 
             // Création de la flotte de drones
             List<Drone> fleet= new List<Drone>();
-            fleet.Add(new Drone(AirSpace.WIDTH / 2, AirSpace.HEIGHT / 2, 3));
+            fleet.Add(new Drone((((AirSpace.WIDTH / 2) / 2) / 2), AirSpace.HEIGHT / 2, 3));
 
             List<Skid> skids= new List<Skid>();
+            List<BazaAzova> bases= new List<BazaAzova>();
+            bases.Add(new BazaAzova(20, 440));
             // Démarrage
-            Application.Run(new AirSpace(fleet));
+            Application.Run(new AirSpace(fleet, bases));
         }
     }
 }
