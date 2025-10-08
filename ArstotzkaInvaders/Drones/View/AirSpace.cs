@@ -1,28 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
+﻿using System.Net.Sockets;
+using System.Reflection;
 
 namespace Drones
 {
     public partial class AirSpace : Form
     {
+        public static Image LoadEmbeddedImage(string resourceName)
+        {
+            // Exemple: "Drones.resources.sky.png"
+            Assembly asm = Assembly.GetExecutingAssembly();
+            Stream stream = asm.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                throw new Exception("Ressource introuvable: " + resourceName);
+            return Image.FromStream(stream);
+        }
+
         public static readonly int WIDTH = 1200;
         public static readonly int HEIGHT = 600;
-
+        private int score = 0;
         private Image _background; // Image de fond
-        private HashSet<Keys> pressedKeys = new HashSet<Keys>();
+        private HashSet<Keys> pressedKeys = new HashSet<Keys>(); // touches pressées
 
-        private List<Drone> fleet;
-        private List<Skid> skids = new List<Skid>();
-        private List<Explosion> explosions = new List<Explosion>();
-        private List<BazaAzova> bases = new List<BazaAzova>();
+        private List<Drone> fleet; // flotte de drones
+        private List<Skid> skids = new List<Skid>(); // tirs des drones
+        private List<Explosion> explosions = new List<Explosion>(); // explosions
+        private List<BazaAzova> bases = new List<BazaAzova>(); // bases
 
         private List<Enemy> enemies = new List<Enemy>(); // Liste des ennemis
         private Image _enemyTexture1;
         private Image _enemyTexture2;
-        private System.Windows.Forms.Timer enemySpawner;
+        private System.Windows.Forms.Timer enemySpawner; // timer pour spawn
 
         private BufferedGraphicsContext currentContext;
         private BufferedGraphics airspace;
@@ -30,7 +37,9 @@ namespace Drones
         private Image _gameOverImage;
         private bool _gameOver = false;
 
-
+        private BigBoss bigBoss;
+        private bool bossAppeared = false;
+        private System.Windows.Forms.Timer gameTimer;
         // Constructeur : initialisation de l'espace aérien
         public AirSpace(List<Drone> fleet, List<BazaAzova> bases)
         {
@@ -51,13 +60,13 @@ namespace Drones
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
             // Chargement de l'image de fond
-            _background = Image.FromFile(Path.Combine(baseDir, @"..\..\..\resources\sky.png"));
+            _background = LoadEmbeddedImage("Drones.Resources.sky.png");
 
-            // --- CHANGEMENT IMPORTANT : charger les textures ennemies ici ---
-            _enemyTexture1 = Image.FromFile(Path.Combine(baseDir, @"..\..\..\resources\ennemy1.png"));
-            _enemyTexture2 = Image.FromFile(Path.Combine(baseDir, @"..\..\..\resources\ennemy2.png"));
+            // Chargement des textures ennemies
+            _enemyTexture1 = LoadEmbeddedImage("Drones.Resources.ennemy1.png");
+            _enemyTexture2 = LoadEmbeddedImage("Drones.Resources.ennemy2.png");
 
-            // Timer pour faire apparaître les ennemis toutes les 5 secondes
+            // Timer pour faire apparaitre les ennemis toutes les 5 secondes
             enemySpawner = new System.Windows.Forms.Timer();
             enemySpawner.Interval = 5000; // 5 secondes
             enemySpawner.Tick += (s, e) => SpawnEnemies();
@@ -65,10 +74,31 @@ namespace Drones
 
             // Timer principal pour la boucle de jeu
             ticker = new System.Windows.Forms.Timer();
-            ticker.Interval = 33; // ~30 FPS
+            ticker.Interval = 33;
             ticker.Tick += NewFrame;
             ticker.Start();
+            gameTimer = new System.Windows.Forms.Timer();
+            gameTimer.Interval = 6000; // 60 000 ms = 1 minute
+            gameTimer.Tick += (s, e) =>
+            {
+                // Supprime tous les ennemis normaux
+                enemies.Clear();
 
+                // Crée le boss s'il n'existe pas encore
+                if (!bossAppeared)
+                {
+                   
+
+                    int bossX = (WIDTH - 200) / 2;
+                    int bossY = 50;
+
+                    bigBoss = new BigBoss(bossX, bossY, 200, 200);
+                    bossAppeared = true;
+                }
+
+                gameTimer.Stop();
+            };
+            gameTimer.Start();
             this.Paint += Form1_Paint;
             this.Resize += (s, e) => this.Invalidate();
         }
@@ -85,6 +115,7 @@ namespace Drones
             pressedKeys.Remove(e.KeyCode);
         }
 
+        // Peinture de fond
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             if (_background == null) return;
@@ -111,36 +142,34 @@ namespace Drones
             e.Graphics.DrawImage(_background, destRect);
         }
 
-        // Méthode pour afficher tout à l'écran
+        // Affiche tout à l'écran
         public void Render()
         {
             airspace.Graphics.DrawImage(_background, this.ClientRectangle);
 
-            // Affichage des drones
             foreach (Drone drone in fleet)
                 drone.Render(airspace);
 
-            // Affichage des skids
             foreach (Skid skid in skids)
                 skid.Render(airspace);
 
-            // Affichage des bases
             foreach (BazaAzova baze in bases)
                 baze.Render(airspace);
 
-            // Affichage des explosions
             foreach (Explosion explosion in explosions)
                 explosion.Render(airspace);
 
-            // Affichage des ennemis
             foreach (var enemy in enemies)
                 enemy.Render(airspace);
+            if (bossAppeared && bigBoss != null)
+            {
+                bigBoss.Render(airspace);
+            }
 
-            // Affichage du nombre de skids et HP
             RenderSkidCount(airspace.Graphics);
             RenderHPCount(airspace.Graphics);
+            RenderScore(airspace.Graphics);
 
-            // Affichage permanent de l'image Game Over si nécessaire
             if (_gameOver && _gameOverImage != null)
             {
                 int x = (this.ClientSize.Width - 900) / 2;
@@ -151,27 +180,29 @@ namespace Drones
             airspace.Render();
         }
 
-        // Méthode pour faire apparaître les ennemis
+        // Faire apparaître des ennemis aléatoires
         private void SpawnEnemies()
         {
             Random rnd = new Random();
-            for (int i = 0; i < 3; i++)
+            // S'il y a moins que 12 ennemies - il va spawner les ennemies  
+            if (enemies.Count < 12)
             {
-                int x = rnd.Next(610, WIDTH - 10);
-                int y = rnd.Next(50, 350);
-                Image tex = rnd.Next(2) == 0 ? _enemyTexture1 : _enemyTexture2;
+                for (int i = 0; i < 2; i++)
+                {
+                    int x = rnd.Next(810, WIDTH - 10);
+                    int y = rnd.Next(50, 350);
+                    Image tex = rnd.Next(2) == 0 ? _enemyTexture1 : _enemyTexture2;
 
-                Enemy enemy = new Enemy(x, y, tex);
+                    Enemy enemy = new Enemy(x, y, tex);
+                    enemy.Width = 140;
+                    enemy.Height = 70;
 
-                // Taille manuelle
-                enemy.Width = 140;   // largeur souhaitée
-                enemy.Height = 70;  // hauteur souhaitée
-
-                enemies.Add(enemy);
+                    enemies.Add(enemy);
+                }
             }
         }
 
-        // Gestion des mouvements des drones
+        // Déplacement des drones selon les touches pressées
         private void UpdateMovement()
         {
             foreach (Drone drone in fleet)
@@ -201,7 +232,7 @@ namespace Drones
             this.Render();
         }
 
-        // Affichage du nombre de HP
+        // Affiche les points de vie de la base
         private void RenderHPCount(Graphics g)
         {
             if (BazaAzova._hpTexture == null) return;
@@ -219,8 +250,12 @@ namespace Drones
                 g.DrawImage(BazaAzova._hpTexture, x, y, iconWidth, iconHeight);
             }
         }
+        //Affichage de score
+        private void RenderScore(Graphics g)
+        {
 
-        // Affichage du nombre de skids
+        }
+        // Affiche le nombre de skids restants
         private void RenderSkidCount(Graphics g)
         {
             if (Skid._skidImage == null) return;
@@ -244,28 +279,26 @@ namespace Drones
         // Mise à jour de l'état du jeu
         private void Update(int interval)
         {
-            // Mise à jour des bases
             foreach (BazaAzova baza in bases) baza.Update(interval);
 
-            // Mise à jour des drones
             foreach (Drone drone in fleet)
             {
                 drone.Update(interval);
                 foreach (var baseAzov in bases)
                     if (drone.GetBounds().IntersectsWith(baseAzov.GetBounds()))
-                        drone.setCharge(3);
+                        drone.setCharge(3); // recharge quand sur la base
             }
+
             foreach (var enemy in enemies)
-            {
                 enemy.Update(interval, bases);
-            }
-            // Mise à jour des skids
+
+            // Mise à jour des skids et gestion des collisions
             for (int i = skids.Count - 1; i >= 0; i--)
             {
                 skids[i].Update(interval);
                 bool skidRemoved = false;
 
-                // Collision avec bases
+                // Collision avec base
                 foreach (var baza in bases)
                 {
                     if (skids[i].GetBounds().IntersectsWith(baza.GetBounds()))
@@ -287,7 +320,7 @@ namespace Drones
 
                         skids.RemoveAt(i);
                         skidRemoved = true;
-
+                        score -= 200;
                         if (baza.HP <= 0) ShowGameOver();
                         break;
                     }
@@ -317,6 +350,7 @@ namespace Drones
 
                         skids.RemoveAt(i);
                         skidRemoved = true;
+                        score += 10;
                         break;
                     }
                 }
@@ -341,20 +375,42 @@ namespace Drones
 
                     skids.RemoveAt(i);
                 }
+                // Collision avec le BigBoss
+                if (bossAppeared && bigBoss != null && skids[i].GetBounds().IntersectsWith(bigBoss.GetBounds()))
+                {
+                    bigBoss.TakeDamage(1); // Chaque skid enlève 1 HP
+                    skids.RemoveAt(i);
+                    skidRemoved = true;
+
+                    // Optionnel : explosion visuelle
+                    var explosion = new Explosion(bigBoss.X + bigBoss.Width / 2, bigBoss.Y + bigBoss.Height / 2);
+                    explosions.Add(explosion);
+
+                    var explosionTimer = new System.Windows.Forms.Timer();
+                    explosionTimer.Interval = 500;
+                    explosionTimer.Tick += (s2, args2) =>
+                    {
+                        explosions.Remove(explosion);
+                        explosionTimer.Stop();
+                        explosionTimer.Dispose();
+                    };
+                    explosionTimer.Start();
+                }
+
             }
         }
 
-        // Affichage de l'image Game Over
+        // Affichage Game Over
         private void ShowGameOver()
         {
             ticker.Stop();
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string gameOverPath = Path.Combine(baseDir, @"..\..\..\resources\gameover.png");
-            _gameOverImage = Image.FromFile(gameOverPath);
+
+            _gameOverImage = LoadEmbeddedImage("Drones.Resources.gameover.png");
             _gameOver = true;
+
         }
 
-        // Boucle de mise à jour à chaque frame
+        // Boucle principale à chaque frame
         private void NewFrame(object sender, EventArgs e)
         {
             this.Update(ticker.Interval);
@@ -367,7 +423,4 @@ namespace Drones
             airspace.Render(e.Graphics);
         }
     }
-
-    // Classe Enemy
-   
 }

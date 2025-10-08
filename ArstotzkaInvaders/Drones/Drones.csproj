@@ -9,10 +9,54 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\basehp.png" />
+    <None Remove="Resources\baseUZ-texture.png" />
+    <None Remove="Resources\bigboss.png" />
+    <None Remove="Resources\Drone.png" />
+    <None Remove="Resources\ennemy1.png" />
+    <None Remove="Resources\ennemy2.png" />
+    <None Remove="Resources\explosion.gif" />
+    <None Remove="Resources\gameover.png" />
+    <None Remove="Resources\gamewin.png" />
+    <None Remove="Resources\obstacle-1hp.png" />
+    <None Remove="Resources\obstacle-2hp.png" />
+    <None Remove="Resources\Raketa.png" />
+    <None Remove="Resources\shovel.png" />
+    <None Remove="Resources\skid.png" />
+    <None Remove="Resources\sky.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\basehp.png" />
+    <EmbeddedResource Include="Resources\baseUZ-texture.png" />
+    <EmbeddedResource Include="Resources\bigboss.png" />
+    <EmbeddedResource Include="Resources\Drone.png" />
+    <EmbeddedResource Include="Resources\ennemy1.png" />
+    <EmbeddedResource Include="Resources\ennemy2.png" />
+    <EmbeddedResource Include="Resources\explosion.gif" />
+    <EmbeddedResource Include="Resources\gameover.png" />
+    <EmbeddedResource Include="Resources\gamewin.png" />
+    <EmbeddedResource Include="Resources\obstacle-1hp.png" />
+    <EmbeddedResource Include="Resources\obstacle-2hp.png" />
+    <EmbeddedResource Include="Resources\Raketa.png" />
+    <EmbeddedResource Include="Resources\shovel.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\skid.png" />
+    <EmbeddedResource Include="Resources\sky.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -23,4 +67,10 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
 </Project>

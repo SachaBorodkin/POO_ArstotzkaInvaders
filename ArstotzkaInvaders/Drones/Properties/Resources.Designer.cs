@@ -69,13 +69,5 @@ namespace Drones.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        internal static System.Drawing.Bitmap sky
-        {
-            get
-            {
-                object obj = ResourceManager.GetObject("sky", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }
