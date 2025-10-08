@@ -13,7 +13,7 @@ namespace Drones
             if (_texture != null)
             {
                 // On affiche l'image du boss à sa position
-                drawingSpace.Graphics.DrawImage(_texture, X, Y, 140, 70);
+                drawingSpace.Graphics.DrawImage(_texture, X, Y, 350, 150);
             }
         }
     }

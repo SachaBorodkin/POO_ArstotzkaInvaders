@@ -27,7 +27,7 @@ namespace Drones
         _texture = LoadEmbeddedImage("Drones.Resources.bigboss.png");
         }
 
-        public BigBoss(int x, int y, int width = 500, int height = 500)
+        public BigBoss(int x, int y, int width, int height)
         {
             X = x;
             Y = y;
@@ -41,7 +41,7 @@ namespace Drones
         // Retourne la zone de collision
         public Rectangle GetBounds()
         {
-            return new Rectangle(X, Y, Width, Height);
+            return new Rectangle(X, Y, 350, 150);
         }
 
         // Réduit les points de vie

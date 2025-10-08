@@ -25,10 +25,13 @@ namespace Drones
         private List<Skid> skids = new List<Skid>(); // tirs des drones
         private List<Explosion> explosions = new List<Explosion>(); // explosions
         private List<BazaAzova> bases = new List<BazaAzova>(); // bases
+        private List<Rocket> rockets = new List<Rocket>();
+
 
         private List<Enemy> enemies = new List<Enemy>(); // Liste des ennemis
         private Image _enemyTexture1;
         private Image _enemyTexture2;
+        private Image _rocketTexture;
         private System.Windows.Forms.Timer enemySpawner; // timer pour spawn
 
         private BufferedGraphicsContext currentContext;
@@ -65,10 +68,11 @@ namespace Drones
             // Chargement des textures ennemies
             _enemyTexture1 = LoadEmbeddedImage("Drones.Resources.ennemy1.png");
             _enemyTexture2 = LoadEmbeddedImage("Drones.Resources.ennemy2.png");
+            _rocketTexture = LoadEmbeddedImage("Drones.Resources.Raketa.png");
 
             // Timer pour faire apparaitre les ennemis toutes les 5 secondes
             enemySpawner = new System.Windows.Forms.Timer();
-            enemySpawner.Interval = 5000; // 5 secondes
+            enemySpawner.Interval = 10000; // 5 secondes
             enemySpawner.Tick += (s, e) => SpawnEnemies();
             enemySpawner.Start();
 
@@ -78,7 +82,7 @@ namespace Drones
             ticker.Tick += NewFrame;
             ticker.Start();
             gameTimer = new System.Windows.Forms.Timer();
-            gameTimer.Interval = 6000; // 60 000 ms = 1 minute
+            gameTimer.Interval = 60000; // 60 000 ms = 1 minute
             gameTimer.Tick += (s, e) =>
             {
                 // Supprime tous les ennemis normaux
@@ -89,10 +93,10 @@ namespace Drones
                 {
                    
 
-                    int bossX = (WIDTH - 200) / 2;
-                    int bossY = 50;
+                    int bossX = 700;
+                    int bossY = (HEIGHT /2) - 30;
 
-                    bigBoss = new BigBoss(bossX, bossY, 200, 200);
+                    bigBoss = new BigBoss(bossX, bossY, 500, 500);
                     bossAppeared = true;
                 }
 
@@ -164,6 +168,7 @@ namespace Drones
             if (bossAppeared && bigBoss != null)
             {
                 bigBoss.Render(airspace);
+                RenderBossHP(airspace.Graphics);
             }
 
             RenderSkidCount(airspace.Graphics);
@@ -176,6 +181,8 @@ namespace Drones
                 int y = (this.ClientSize.Height - 200) / 2;
                 airspace.Graphics.DrawImage(_gameOverImage, x, y, 900, 200);
             }
+            foreach (var rocket in rockets)
+                rocket.Render(airspace);
 
             airspace.Render();
         }
@@ -253,7 +260,17 @@ namespace Drones
         //Affichage de score
         private void RenderScore(Graphics g)
         {
+            string scoreText = $"Score: {score}";
+            Font font = new Font("Arial", 16, FontStyle.Bold);
 
+            SizeF textSize = g.MeasureString(scoreText, font);
+
+            float x = this.ClientSize.Width - textSize.Width - 10; // à 10px du bord droit
+            float y = 10; // 10px du haut
+
+            // Ombre noire pour visibilité
+            g.DrawString(scoreText, font, Brushes.Black, x + 1, y + 1);
+            g.DrawString(scoreText, font, Brushes.White, x, y);
         }
         // Affiche le nombre de skids restants
         private void RenderSkidCount(Graphics g)
@@ -279,6 +296,34 @@ namespace Drones
         // Mise à jour de l'état du jeu
         private void Update(int interval)
         {
+            foreach (var enemy in enemies)
+            {
+                enemy.Update(interval, bases);
+
+                // Find nearest base
+                if (bases.Count == 0) continue;
+                BazaAzova target = bases[0];
+                float minDist = float.MaxValue;
+                foreach (var b in bases)
+                {
+                    float dx = b.X - enemy.X;
+                    float dy = b.Y - enemy.Y;
+                    float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        target = b;
+                    }
+                }
+
+                // If close enough, shoot rocket every 3 sec
+                if (minDist <= 100 && enemy.CanShoot())
+                {
+                    rockets.Add(new Rocket(enemy.X + enemy.Width / 2 - 10, enemy.Y + enemy.Height, target, _rocketTexture));
+                    enemy.ResetShootTimer();
+                }
+            }
+
             foreach (BazaAzova baza in bases) baza.Update(interval);
 
             foreach (Drone drone in fleet)
@@ -291,7 +336,46 @@ namespace Drones
 
             foreach (var enemy in enemies)
                 enemy.Update(interval, bases);
+            for (int i = rockets.Count - 1; i >= 0; i--)
+            {
+                rockets[i].Update(interval);
 
+                bool removed = false;
+
+                // vérifier collision avec chaque base
+                for (int b = 0; b < bases.Count; b++)
+                {
+                    var baza = bases[b];
+                    if (rockets[i].GetBounds().IntersectsWith(baza.GetBounds()))
+                    {
+
+                        // explosion à l'endroit de l'impact
+                        var explosion = new Explosion((int)rockets[i].X, (int)rockets[i].Y);
+                        explosions.Add(explosion);
+                        baza.setHP(baza.HP - 1);
+                        var timer = new System.Windows.Forms.Timer();
+                        timer.Interval = 500;
+                        timer.Tick += (s2, e2) =>
+                        {
+                            explosions.Remove(explosion);
+                            timer.Stop();
+                            timer.Dispose();
+                        };
+                        timer.Start();
+                        rockets.RemoveAt(i);
+                        if (baza.HP <= 0) ShowGameOver();
+                        break;
+                    }
+                }
+
+                if (removed) continue;
+
+                // si la rocket sort de l'écran, la retirer
+                if (i < rockets.Count && rockets[i].Y > HEIGHT + 100) // marge
+                {
+                    rockets.RemoveAt(i);
+                }
+            }
             // Mise à jour des skids et gestion des collisions
             for (int i = skids.Count - 1; i >= 0; i--)
             {
@@ -304,28 +388,13 @@ namespace Drones
                     if (skids[i].GetBounds().IntersectsWith(baza.GetBounds()))
                     {
                         baza.setHP(baza.HP - 1);
-
-                        var explosion = new Explosion(skids[i].X, skids[i].Y);
-                        explosions.Add(explosion);
-
-                        var explosionTimer = new System.Windows.Forms.Timer();
-                        explosionTimer.Interval = 500;
-                        explosionTimer.Tick += (s, args) =>
-                        {
-                            explosions.Remove(explosion);
-                            explosionTimer.Stop();
-                            explosionTimer.Dispose();
-                        };
-                        explosionTimer.Start();
-
+                        AddExplosion(skids[i].X, skids[i].Y);
                         skids.RemoveAt(i);
                         skidRemoved = true;
-                        score -= 200;
                         if (baza.HP <= 0) ShowGameOver();
                         break;
                     }
                 }
-
                 if (skidRemoved) continue;
 
                 // Collision avec ennemis
@@ -334,32 +403,30 @@ namespace Drones
                     if (skids[i].GetBounds().IntersectsWith(enemies[j].GetBounds()))
                     {
                         enemies.RemoveAt(j);
-
-                        var explosion = new Explosion(skids[i].X, skids[i].Y);
-                        explosions.Add(explosion);
-
-                        var explosionTimer = new System.Windows.Forms.Timer();
-                        explosionTimer.Interval = 500;
-                        explosionTimer.Tick += (s, args) =>
-                        {
-                            explosions.Remove(explosion);
-                            explosionTimer.Stop();
-                            explosionTimer.Dispose();
-                        };
-                        explosionTimer.Start();
-
+                        score += 10;
+                        AddExplosion(skids[i].X, skids[i].Y);
                         skids.RemoveAt(i);
                         skidRemoved = true;
-                        score += 10;
                         break;
                     }
                 }
-
                 if (skidRemoved) continue;
 
-                // Collision avec le sol
+                // Collision avec sol
                 if (skids[i].Y >= 550)
                 {
+                    AddExplosion(skids[i].X, skids[i].Y);
+                    skids.RemoveAt(i);
+                    continue;
+                }
+
+
+                // Collision avec le BigBoss
+                if (bossAppeared && bigBoss != null && skids[i].GetBounds().IntersectsWith(bigBoss.GetBounds()))
+                {
+                    bigBoss.TakeDamage(1); // chaque skid enlève 1 HP
+
+                    // explosion visuelle à la position du skid (pas rockets)
                     var explosion = new Explosion(skids[i].X, skids[i].Y);
                     explosions.Add(explosion);
 
@@ -373,33 +440,36 @@ namespace Drones
                     };
                     explosionTimer.Start();
 
-                    skids.RemoveAt(i);
-                }
-                // Collision avec le BigBoss
-                if (bossAppeared && bigBoss != null && skids[i].GetBounds().IntersectsWith(bigBoss.GetBounds()))
-                {
-                    bigBoss.TakeDamage(1); // Chaque skid enlève 1 HP
-                    skids.RemoveAt(i);
+                    skids.RemoveAt(i); // enlever le skid
                     skidRemoved = true;
 
-                    // Optionnel : explosion visuelle
-                    var explosion = new Explosion(bigBoss.X + bigBoss.Width / 2, bigBoss.Y + bigBoss.Height / 2);
-                    explosions.Add(explosion);
-
-                    var explosionTimer = new System.Windows.Forms.Timer();
-                    explosionTimer.Interval = 500;
-                    explosionTimer.Tick += (s2, args2) =>
+                    // Vérifie si le boss est mort
+                    if (bigBoss.HP <= 0)
                     {
-                        explosions.Remove(explosion);
-                        explosionTimer.Stop();
-                        explosionTimer.Dispose();
-                    };
-                    explosionTimer.Start();
+                        bossAppeared = false;
+                        bigBoss = null;
+                        score += 1000; // bonus
+                        ShowGameWin();
+                    }
                 }
 
             }
-        }
+            }
+        private void RenderBossHP(Graphics g)
+        {
+            if (!bossAppeared || bigBoss == null) return;
 
+            string hpText = $"HP: {bigBoss.HP}/10"; // Affiche les PV
+            Font font = new Font("Arial", 14, FontStyle.Bold);
+            SizeF textSize = g.MeasureString(hpText, font);
+
+            float x = bigBoss.X + (bigBoss.Width - textSize.Width) / 2;
+            float y = bigBoss.Y - textSize.Height - 5; // juste au-dessus du boss
+
+            // Dessiner le texte en blanc avec contour noir pour visibilité
+            g.DrawString(hpText, font, Brushes.White, x + 1, y + 1); // ombre
+            g.DrawString(hpText, font, Brushes.Black, x, y);
+        }
         // Affichage Game Over
         private void ShowGameOver()
         {
@@ -409,12 +479,33 @@ namespace Drones
             _gameOver = true;
 
         }
+        private void ShowGameWin()
+        {
+            ticker.Stop();
 
+            _gameOverImage = LoadEmbeddedImage("Drones.Resources.gamewin.png");
+            _gameOver = true;
+        }
         // Boucle principale à chaque frame
         private void NewFrame(object sender, EventArgs e)
         {
             this.Update(ticker.Interval);
             this.Render();
+        }
+        private void AddExplosion(int x, int y)
+        {
+            var explosion = new Explosion(x, y);
+            explosions.Add(explosion);
+
+            var explosionTimer = new System.Windows.Forms.Timer();
+            explosionTimer.Interval = 500;
+            explosionTimer.Tick += (s, args) =>
+            {
+                explosions.Remove(explosion);
+                explosionTimer.Stop();
+                explosionTimer.Dispose();
+            };
+            explosionTimer.Start();
         }
 
         protected override void OnPaint(PaintEventArgs e)
