@@ -21,3 +21,28 @@
 - Le nommage des commits est OK maintenant
 - Le code a bien avancé
 - Le rapport est assez bien, mais il faudrait réserver les maquettes pour la section Analyse fonctionnelle au lieu de l'introduction
+
+## 80%
+
+Les valeurs possibles du résultat sont: LA (Largement Acquis), A (Acquis), I (Insuffisant), NA (non acquis)
+
+| Critère                    | Résultat | Commentaire |
+| -------------------------- | -------- | ----------- |
+| Avancement Obstacles       |          |             |
+| Avancement Joueur          |          |             |
+| Avancement Tirs            |          |             |
+| Avancement ennemis         |          |             |
+| Avancement score           |          |             |
+| Qualité Présentation       |          |             |
+| Qualité Commentaires       |          |             |
+| Qualité Conventions        |          |             |
+| POO                        |          |             |
+| Processus Journal          |          |             |
+| Processus Git              |          |             |
+| Processus Livraison        |          |             |
+| Expression User Stories    |          |             |
+| Expression Rapport Fome    |          |             |
+| Expression Rapport Contenu |          |             |
+| Ecologie (gitignore)       |          |             |
+| Comportement collectif     |          |             |
+| Comportement individuel    |          |             |
