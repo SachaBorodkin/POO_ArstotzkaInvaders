@@ -26,23 +26,25 @@
 
 Les valeurs possibles du résultat sont: LA (Largement Acquis), A (Acquis), I (Insuffisant), NA (non acquis)
 
-| Critère                    | Résultat | Commentaire |
-| -------------------------- | -------- | ----------- |
-| Avancement Obstacles       |          |             |
-| Avancement Joueur          |          |             |
-| Avancement Tirs            |          |             |
-| Avancement ennemis         |          |             |
-| Avancement score           |          |             |
-| Qualité Présentation       |          |             |
-| Qualité Commentaires       |          |             |
-| Qualité Conventions        |          |             |
-| POO                        |          |             |
-| Processus Journal          |          |             |
-| Processus Git              |          |             |
-| Processus Livraison        |          |             |
-| Expression User Stories    |          |             |
-| Expression Rapport Fome    |          |             |
-| Expression Rapport Contenu |          |             |
-| Ecologie (gitignore)       |          |             |
-| Comportement collectif     |          |             |
-| Comportement individuel    |          |             |
+| Critère                    | Résultat | Commentaire                                                                                                                                                                                                                                 |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Avancement Obstacles       | NA       | je n'en vois aucun                                                                                                                                                                                                                          |
+| Avancement Joueur          | A        | je vous conseille fortement d'augmenter la taille de votre fenêtre pour que le jeu soit plus intéressant                                                                                                                                    |
+| Avancement Tirs            | A        |                                                                                                                                                                                                                                             |
+| Avancement ennemis         | A        |                                                                                                                                                                                                                                             |
+| Avancement score           | A        |                                                                                                                                                                                                                                             |
+| Qualité Présentation       | I        | L'indentation n'est pas toujours bonne. Exemple: Skid.cs:29. ctrl-A-K-F !!                                                                                                                                                                  |
+| Qualité Commentaires       | A        |                                                                                                                                                                                                                                             |
+| Qualité Conventions        | I        | il y a des propriété publique avec des minuscules.<br> mettez les getters et les setters ensemble pour une même propriété (skid X)<br> lorsque vous avez des valeurs constante, déclaré, il est quand même constante, et pas comme variable |
+| POO                        | A        |                                                                                                                                                                                                                                             |
+| Processus Journal          | A        |                                                                                                                                                                                                                                             |
+| Processus Git              | LA       |                                                                                                                                                                                                                                             |
+| Processus Livraison        | I        | vous devez également joindre à la livraison votre journal de travail en PDF, ainsi que la grille d'auto évaluation                                                                                                                          |
+| Expression User Stories    | I        | vos US doivent contenir les maquettes. Vous pouvez les insérer directement après les tests de acceptance dans la description de l'issue.                                                                                                    |
+| Expression Rapport Forme   | A        |                                                                                                                                                                                                                                             |
+| Expression Rapport Contenu | I        | les objectifs doivent être plus détaillés.<br>Pour les objectifs du produit, décrivez les principes du jeu et ainsi que le thème choisi<br> il n'y a pas de diagramme de classes UML                                                        |
+| Ecologie (gitignore)       | LA       |                                                                                                                                                                                                                                             |
+| Comportement collectif     | A        |                                                                                                                                                                                                                                             |
+| Comportement individuel    | A        |                                                                                                                                                                                                                                             |
+
+Mis à part l'absence d'obstacles, le code est complet. Il reste un effort important à faire sur  la documentation
