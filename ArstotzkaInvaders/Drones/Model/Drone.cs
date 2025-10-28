@@ -20,7 +20,7 @@ namespace Drones
         }
 
         // Zone de collision (hitbox)
-        public Rectangle GetBounds() => new Rectangle(_x, _y, 130, 90);
+        public Rectangle GetBounds() => new Rectangle(_x, _y, 140, 70);
 
         // Propriétés pour accès
         public int X { get => _x; set => _x = value; }

@@ -6,8 +6,8 @@ namespace Drones
     public class Obstacle
     {
         // Constantes pour dimensions
-        private const int OBSTACLE_WIDTH = 80;
-        private const int OBSTACLE_HEIGHT = 50;
+        private const int OBSTACLE_WIDTH = 50;
+        private const int OBSTACLE_HEIGHT = 75;
 
         // Position et taille
         private float _x, _y;

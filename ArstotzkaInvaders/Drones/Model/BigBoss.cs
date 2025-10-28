@@ -8,8 +8,8 @@ namespace Drones
     public partial class BigBoss
     {
         // Dimensions par défaut
-        private const int _BOSSWIDTH = 250;
-        private const int _BOSSHEIGHT = 150;
+        private const int _BOSSWIDTH = 200;
+        private const int _BOSSHEIGHT = 200;
 
         // Champs privés
         private int _x, _y;
