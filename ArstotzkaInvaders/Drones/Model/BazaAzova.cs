@@ -21,31 +21,28 @@ namespace Drones
             return Image.FromStream(stream);
         }
         // image de base
-        public static readonly Image _baseImage;
+        private static readonly Image _baseImage;
         // texture de la barre de vie
-        public static readonly Image _hpTexture;
+        private static readonly Image _hpTexture;
 
+  
         static BazaAzova()
         {
             // chemin pour l’image de la base
-
-
-
-               _baseImage = LoadEmbeddedImage("Drones.Resources.baseUZ-texture.png");
+            _baseImage = LoadEmbeddedImage("Drones.Resources.baseUZ-texture.png");
 
             // l’image de la vie
-               
-        
-
-               _hpTexture = LoadEmbeddedImage("Drones.Resources.basehp.png");
+            _hpTexture = LoadEmbeddedImage("Drones.Resources.basehp.png");
         }
-
+        public static Image BaseImage => _baseImage;
+        public static Image HpTexture => _hpTexture;
         // coordonnées X
         private int _x;
         // coordonnées Y
         private int _y;
         // points de vie initiaux
-        private int _hp = 6;
+        private const int _HP_MAX = 6;
+        private int _hp = _HP_MAX;
 
         // retourne la zone (hitbox) de la base
         public Rectangle GetBounds()
@@ -61,9 +58,19 @@ namespace Drones
         }
 
         // récupère X
-        public int X { get { return _x; } }
+        public int X
+        {
+            get => _x;
+            set => _x = value;
+
+        }
         // récupère Y
-        public int Y { get { return _y; } }
+        public int Y
+        {
+            get => _y;
+            set => _y = value;
+
+        }
 
         // méthode Update
         public void Update(int interval)
@@ -71,13 +78,11 @@ namespace Drones
 
         }
 
-        // définit les points de vie
-        public void setHP(int hp)
-        {
-            _hp = hp;
-        }
-
         // renvoie les points de vie
-        public int HP { get { return _hp; } }
+        public int HP
+        {
+            get => _hp;
+            set => _hp = value;
+        }
     }
 }

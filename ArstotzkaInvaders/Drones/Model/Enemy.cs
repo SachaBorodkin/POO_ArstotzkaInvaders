@@ -6,65 +6,72 @@ namespace Drones
 {
     public partial class Enemy
     {
-        public float X, Y;             // Position de l'ennemi
-        public int Width = 60, Height = 60;
-        public Image Texture;
+        // Constantes pour dimensions
+        private const int ENEMY_WIDTH = 140;
+        private const int ENEMY_HEIGHT = 70;
 
-        private float yCible;          // Y aléatoire pour zigzag
-        private Random rnd = new Random();
+        // Position et taille
+        private float _x, _y;
+        private int _width, _height;
+        private Image _texture;
 
-        private bool aTire = false;    // True si l'ennemi a déjà tiré
+        // Cible pour zigzag
+        private float _yCible;
+        private Random _rnd = new Random();
 
+        // Tir
+        private bool _aTire = false;
+
+        // Propriétés
+        public float X { get => _x; set => _x = value; }
+        public float Y { get => _y; set => _y = value; }
+        public int Width { get => _width; set => _width = value; }
+        public int Height { get => _height; set => _height = value; }
+        public Image Texture { get => _texture; set => _texture = value; }
+
+        // Constructeur
         public Enemy(int x, int y, Image tex)
         {
-            X = x;
-            Y = y;
-            Texture = tex;
+            _x = x;
+            _y = y;
+            _texture = tex;
+            _width = ENEMY_WIDTH;
+            _height = ENEMY_HEIGHT;
 
-            // Y aléatoire initial pour zigzag
-            yCible = rnd.Next(50, AirSpace.HEIGHT - 50);
+            _yCible = _rnd.Next(50, AirSpace.HEIGHT - 50);
         }
 
         // Affichage
         public void Render(BufferedGraphics bg)
         {
-            if (Texture != null)
-                bg.Graphics.DrawImage(Texture, (int)X, (int)Y, Width, Height);
+            if (_texture != null)
+                bg.Graphics.DrawImage(_texture, (int)_x, (int)_y, _width, _height);
         }
 
-        public Rectangle GetBounds()
-        {
-            return new Rectangle((int)X, (int)Y, Width, Height);
-        }
+        // Zone de collision
+        public Rectangle GetBounds() => new Rectangle((int)_x, (int)_y, _width, _height);
 
+        // Mise à jour de la position et zigzag
         public void Update(int interval, List<BazaAzova> bases)
         {
-            // Déplacement horizontal vers la gauche
+            // Déplacement horizontal
             float vitesseX = 0.05f * interval;
-            X -= vitesseX;
+            _x -= vitesseX;
 
             // Zigzag vertical
-            float dy = yCible - Y;
+            float dy = _yCible - _y;
             float vitesseY = 0.03f * interval;
             if (Math.Abs(dy) > 1)
-                Y += Math.Sign(dy) * vitesseY;
+                _y += Math.Sign(dy) * vitesseY;
 
             if (Math.Abs(dy) < 5)
-            {
-                yCible = rnd.Next(50, AirSpace.HEIGHT - 50);
-            }
+                _yCible = _rnd.Next(50, AirSpace.HEIGHT - 50);
         }
 
         // Vérifie si l'ennemi peut tirer
-        public bool PeutTirer()
-        {
-            return !aTire;
-        }
+        public bool PeutTirer() => !_aTire;
 
-        // Réinitialise l’état de tir (inutile si un seul tir)
-        public void ReinitialiserTir()
-        {
-            aTire = true;
-        }
+        // Marque l'ennemi comme ayant tiré
+        public void ReinitialiserTir() => _aTire = true;
     }
 }

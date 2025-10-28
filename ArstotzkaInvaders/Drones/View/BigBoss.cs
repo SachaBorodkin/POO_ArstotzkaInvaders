@@ -10,10 +10,10 @@ namespace Drones
     {
         public void Render(BufferedGraphics drawingSpace)
         {
-            if (_texture != null)
+            if (BossTexture != null)
             {
                 // On affiche l'image du boss à sa position
-                drawingSpace.Graphics.DrawImage(_texture, X, Y, 350, 150);
+                drawingSpace.Graphics.DrawImage(BossTexture, X, Y, 350, 150);
             }
         }
     }

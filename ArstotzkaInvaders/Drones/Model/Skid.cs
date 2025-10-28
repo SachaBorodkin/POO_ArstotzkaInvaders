@@ -1,63 +1,116 @@
 ﻿using Drones;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Drawing;
+using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Drones
 {
     public partial class Skid
     {
+        // Constantes pour dimensions
+        private const int SKID_WIDTH = 35;
+        private const int SKID_HEIGHT = 30;
+
+        // Image statique du skid
+        public static readonly Image SkidImage;
+
+        // Chargement de l'image une seule fois
+        static Skid()
+        {
+            SkidImage = LoadEmbeddedImage("Drones.Resources.skid.png");
+        }
+
+        // Méthode de chargement d'une image embarquée
         public static Image LoadEmbeddedImage(string resourceName)
         {
-            // Exemple: "Drones.resources.sky.png"
             Assembly asm = Assembly.GetExecutingAssembly();
             Stream stream = asm.GetManifestResourceStream(resourceName);
             if (stream == null)
                 throw new Exception("Ressource introuvable: " + resourceName);
             return Image.FromStream(stream);
         }
-        // Image statique du skid
-        public static readonly Image _skidImage;
 
-        // Chargement de l'image du skid une seule fois
-        static Skid()
-        {
-            _skidImage = LoadEmbeddedImage("Drones.Resources.skid.png"); // on charge l'image si elle existe, sinon tant pis
-            }
+        // Position
+        private int _x;
+        private int _y;
 
+        // Propriétés
+        public int X { get => _x; set => _x = value; }
+        public int Y { get => _y; set => _y = value; }
 
-        private int _x; // position X
-        private int _y; // position Y
-
-        // Constructeur simple
+        // Constructeur
         public Skid(int x, int y)
         {
             _x = x;
             _y = y;
         }
 
-        // Getters
-        public int X { get { return _x; } }
-        public int Y { get { return _y; } }
-
-        // Setters
-        public void skidSetX(int x) { _x = x; }
-        public void skidSetY(int y) { _y = y; }
-
-        // Mise à jour de la position du skid
+        // Mise à jour de la position
         public void Update(int interval)
         {
-            int height = Y; 
-            skidSetY(Y + 20); // le skid descend toujours
+            _y += 20; // le skid descend toujours
         }
 
-        // Renvoie la zone occupée par le skid
-        public Rectangle GetBounds()
+        // Hitbox
+        public Rectangle GetBounds() => new Rectangle(_x, _y, SKID_WIDTH, SKID_HEIGHT);
+
+        // Dessine le skid
+        public void Render(BufferedGraphics drawingSpace)
         {
-            return new Rectangle(X, Y, 35, 30);
+            if (SkidImage != null)
+                drawingSpace.Graphics.DrawImage(SkidImage, _x, _y, SKID_WIDTH, SKID_HEIGHT);
+        }
+    }
+
+    public class Explosion
+    {
+        // Constantes pour dimensions
+        private const int EXPLOSION_WIDTH = 170;
+        private const int EXPLOSION_HEIGHT = 160;
+
+        // Image statique de l'explosion
+        private static readonly Image ExplosionImage;
+
+        // Chargement de l'image
+        static Explosion()
+        {
+            ExplosionImage = LoadEmbeddedImage("Drones.Resources.explosion.gif");
+        }
+
+        // Méthode de chargement d'une image embarquée
+        public static Image LoadEmbeddedImage(string resourceName)
+        {
+            Assembly asm = Assembly.GetExecutingAssembly();
+            Stream stream = asm.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                throw new Exception("Ressource introuvable: " + resourceName);
+            return Image.FromStream(stream);
+        }
+
+        // Position
+        private int _x;
+        private int _y;
+
+        // Propriétés
+        public int X { get => _x; set => _x = value; }
+        public int Y { get => _y; set => _y = value; }
+
+        // Constructeur
+        public Explosion(int x, int y)
+        {
+            _x = x;
+            _y = y;
+        }
+
+        // Hitbox
+        public Rectangle GetBounds() => new Rectangle(_x - 80, _y - 100, EXPLOSION_WIDTH, EXPLOSION_HEIGHT);
+
+        // Dessine l'explosion
+        public void Render(BufferedGraphics drawingSpace)
+        {
+            if (ExplosionImage != null)
+                drawingSpace.Graphics.DrawImage(ExplosionImage, _x - 80, _y - 100, EXPLOSION_WIDTH, EXPLOSION_HEIGHT);
         }
     }
 }

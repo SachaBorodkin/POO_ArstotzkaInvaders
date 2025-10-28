@@ -5,31 +5,53 @@ namespace Drones
 {
     public class Obstacle
     {
-        public float X, Y;
-        public int Width = 100, Height = 50;
-        public int HP = 2;
-        private Image texture;
+        // Constantes pour dimensions
+        private const int OBSTACLE_WIDTH = 80;
+        private const int OBSTACLE_HEIGHT = 50;
 
-        public static Image texture2HP;
-        public static Image texture1HP;
-        public static Image textureShovel;
+        // Position et taille
+        private float _x, _y;
+        private int _width, _height;
+        private int _hp;
 
-        private static Random rnd = new Random();
-        public bool Detruit = false; // vrai si HP = 0 et chute
+        // Texture actuelle
+        private Image _texture;
 
+        // Textures partagées
+        public static Image Texture2HP;
+        public static Image Texture1HP;
+        public static Image TextureShovel;
+
+        private static Random _rnd = new Random();
+
+        // État
+        public bool Detruit { get; private set; } = false;
+
+        // Propriétés
+        public float X { get => _x; set => _x = value; }
+        public float Y { get => _y; set => _y = value; }
+        public int Width { get => _width; }
+        public int Height { get => _height; }
+        public int HP { get => _hp; private set => _hp = value < 0 ? 0 : value; }
+
+        // Constructeur
         public Obstacle(int x, int y)
         {
-            X = x;
-            Y = y;
-            HP = 2;
+            _x = x;
+            _y = y;
+            _width = OBSTACLE_WIDTH;
+            _height = OBSTACLE_HEIGHT;
+            _hp = 2;
 
-            if (texture2HP == null) texture2HP = LoadEmbeddedImage("Drones.Resources.obstacle-2hp.png");
-            if (texture1HP == null) texture1HP = LoadEmbeddedImage("Drones.Resources.obstacle-1hp.png");
-            if (textureShovel == null) textureShovel = LoadEmbeddedImage("Drones.Resources.shovel.png");
+            // Chargement des textures si non déjà chargé
+            if (Texture2HP == null) Texture2HP = LoadEmbeddedImage("Drones.Resources.obstacle-2hp.png");
+            if (Texture1HP == null) Texture1HP = LoadEmbeddedImage("Drones.Resources.obstacle-1hp.png");
+            if (TextureShovel == null) TextureShovel = LoadEmbeddedImage("Drones.Resources.shovel.png");
 
-            texture = texture2HP;
+            _texture = Texture2HP;
         }
 
+        // Chargement d'image embarquée
         public static Image LoadEmbeddedImage(string resourceName)
         {
             var asm = System.Reflection.Assembly.GetExecutingAssembly();
@@ -38,54 +60,42 @@ namespace Drones
             return Image.FromStream(stream);
         }
 
+        // Dessin
         public void Render(BufferedGraphics bg)
         {
-            if (texture != null)
-                bg.Graphics.DrawImage(texture, (int)X, (int)Y, Width, Height);
+            if (_texture != null)
+                bg.Graphics.DrawImage(_texture, (int)_x, (int)_y, _width, _height);
         }
 
-        public Rectangle GetBounds()
-        {
-            return new Rectangle((int)X, (int)Y, Width, Height);
-        }
+        // Hitbox
+        public Rectangle GetBounds() => new Rectangle((int)_x, (int)_y, _width, _height);
 
+        // Mise à jour de l'état
         public void Update(int interval)
         {
-            // Chute si détruit
-            if (HP <= 0)
+            if (_hp <= 0)
             {
                 Detruit = true;
-                Y += 0.3f * interval; // tombe doucement
-                texture = textureShovel;
+                _y += 0.3f * interval;
+                _texture = TextureShovel;
             }
-            else if (HP == 2)
-            {
-                texture = texture2HP;
-            }
-            else if (HP == 1)
-            {
-                texture = texture1HP;
-            }
+            else if (_hp == 2) _texture = Texture2HP;
+            else if (_hp == 1) _texture = Texture1HP;
 
-            // Supprimer si touche le sol
-            if (Y + Height >= AirSpace.HEIGHT)
+            if (_y + _height >= AirSpace.HEIGHT)
             {
                 Detruit = true;
                 HP = 0;
             }
         }
 
-        public bool InterfereWithEnemy(Rectangle enemyBounds)
-        {
-            return enemyBounds.IntersectsWith(this.GetBounds());
-        }
+        // Vérifie collision avec un ennemi
+        public bool InterfereWithEnemy(Rectangle enemyBounds) => enemyBounds.IntersectsWith(this.GetBounds());
 
+        // Subit des dégâts
         public void TakeDamage(int dmg)
         {
-            if (HP > 0)
-                HP -= dmg;
-
-            if (HP < 0) HP = 0;
+            if (_hp > 0) HP -= dmg;
         }
     }
 }

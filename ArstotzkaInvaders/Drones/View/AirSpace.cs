@@ -22,7 +22,6 @@ namespace Drones
         private int score = 0;
         private Image _background; // Image de fond
         private HashSet<Keys> pressedKeys = new HashSet<Keys>(); // touches pressées
-
         private List<Drone> fleet; // flotte de drones
         private List<Skid> skids = new List<Skid>(); // tirs des drones
         private List<Explosion> explosions = new List<Explosion>(); // explosions
@@ -83,35 +82,52 @@ namespace Drones
 
 
             // Timer pour faire apparaître des obstacles toutes les 15 secondes
+            int maxObstacles = 10;
+            int spawnedObstacles = 0;
+
             obstacleSpawner = new System.Windows.Forms.Timer();
             obstacleSpawner.Interval = 15000; // 15 seconds
             obstacleSpawner.Tick += (s, e) =>
             {
-                int obstaclesToSpawn = 10; // spawn only enough to reach 10
-                if (obstaclesToSpawn > 0)
+                if (spawnedObstacles >= maxObstacles)
                 {
-                    Random rnd = new Random();
-                    int attempts = 0;
+                    obstacleSpawner.Stop(); // stop spawning after reaching 10
+                    return;
+                }
 
-                    for (int i = 0; i < obstaclesToSpawn; i++)
+                Random rnd = new Random();
+                int attempts = 0;
+
+                // spawn only the remaining needed obstacles
+                int obstaclesToSpawn = 3;
+
+                for (int i = 0; i < obstaclesToSpawn; i++)
+                {
+                    bool validPosition = false;
+                    Obstacle obs = null;
+
+                    while (!validPosition && attempts < 5) // avoid infinite loops
                     {
-                        bool validPosition = false;
-                        Obstacle obs = null;
+                        attempts++;
+                        int x = rnd.Next(0, WIDTH - 100);
+                        int y = rnd.Next(0, HEIGHT - 100);
+                        obs = new Obstacle(x, y);
+                        Rectangle obsBounds = obs.GetBounds();
 
-                        while (!validPosition && attempts < 5) // avoid infinite loops
+                        // Ensure it doesn't overlap any drones
+                        validPosition = !fleet.Any(d => obsBounds.IntersectsWith(new Rectangle(d.X, d.Y, 130, 90)));
+                    }
+
+                    if (validPosition && obs != null)
+                    {
+                        obstacles.Add(obs);
+                        spawnedObstacles++;
+
+                        if (spawnedObstacles >= maxObstacles)
                         {
-                            attempts++;
-                            int x = rnd.Next(0, WIDTH - 100); // adjust obstacle width
-                            int y = rnd.Next(0, HEIGHT - 100); // adjust obstacle height
-                            obs = new Obstacle(x, y); // assuming you modify Obstacle constructor to accept position
-                            Rectangle obsBounds = obs.GetBounds();
-
-                            // Check intersection with all drones
-                            validPosition = !fleet.Any(d => obsBounds.IntersectsWith(new Rectangle(d.X, d.Y, 130, 90)));
+                            obstacleSpawner.Stop(); // stop immediately if we reached 10
+                            break;
                         }
-
-                        if (validPosition && obs != null)
-                            obstacles.Add(obs);
                     }
                 }
             };
@@ -134,10 +150,10 @@ namespace Drones
                 // Crée le boss s'il n'existe pas encore
                 if (!bossAppeared)
                 {
-                   
+
 
                     int bossX = 700;
-                    int bossY = (HEIGHT /2) - 30;
+                    int bossY = (HEIGHT / 2) - 30;
 
                     bigBoss = new BigBoss(bossX, bossY, 500, 500);
                     bossAppeared = true;
@@ -268,34 +284,34 @@ namespace Drones
                 // Move up
                 if (pressedKeys.Contains(Keys.W) || pressedKeys.Contains(Keys.Up))
                 {
-                    drone.setY(drone.Y - 10);
+                    drone.Y -= 10;
                     // Border check
                     if (drone.Y < 0 || obstacles.Any(obs => drone.GetBounds().IntersectsWith(obs.GetBounds())))
-                        drone.setY(drone.Y + 10); // revert
+                        drone.Y += 10; // revert
                 }
 
                 // Move down
                 if (pressedKeys.Contains(Keys.S) || pressedKeys.Contains(Keys.Down))
                 {
-                    drone.setY(drone.Y + 10);
+                    drone.Y += 10;
                     if (drone.Y + 90 > AirSpace.HEIGHT || obstacles.Any(obs => drone.GetBounds().IntersectsWith(obs.GetBounds())))
-                        drone.setY(drone.Y - 10); // revert
+                        drone.Y -= 10; // revert
                 }
 
                 // Move left
                 if (pressedKeys.Contains(Keys.A) || pressedKeys.Contains(Keys.Left))
                 {
-                    drone.setX(drone.X - 10);
+                    drone.X -= 10;
                     if (drone.X < 0 || obstacles.Any(obs => drone.GetBounds().IntersectsWith(obs.GetBounds())))
-                        drone.setX(drone.X + 10); // revert
+                        drone.X += 10; // revert
                 }
 
                 // Move right
                 if (pressedKeys.Contains(Keys.D) || pressedKeys.Contains(Keys.Right))
                 {
-                    drone.setX(drone.X + 10);
-                    if (drone.X +130 > AirSpace.WIDTH || obstacles.Any(obs => drone.GetBounds().IntersectsWith(obs.GetBounds())))
-                        drone.setX(drone.X - 10); // revert
+                    drone.X += 10;
+                    if (drone.X + 130 > AirSpace.WIDTH || obstacles.Any(obs => drone.GetBounds().IntersectsWith(obs.GetBounds())))
+                        drone.X += 10; // revert
                 }
 
                 // Shooting
@@ -304,7 +320,7 @@ namespace Drones
                     if (drone.Charge > 0)
                     {
                         skids.Add(new Skid(drone.X + 65, drone.Y + 70));
-                        drone.setCharge(drone.Charge - 1);
+                        drone.Charge--;
                     }
                 }
             }
@@ -316,7 +332,7 @@ namespace Drones
         // Affiche les points de vie de la base
         private void RenderHPCount(Graphics g)
         {
-            if (BazaAzova._hpTexture == null) return;
+            if (BazaAzova.HpTexture == null) return;
 
             int remaining = 0;
             foreach (var baza in bases) remaining += baza.HP;
@@ -328,7 +344,7 @@ namespace Drones
             for (int i = 0; i < remaining; i++)
             {
                 int x = startX + i * (iconWidth + spacing);
-                g.DrawImage(BazaAzova._hpTexture, x, y, iconWidth, iconHeight);
+                g.DrawImage(BazaAzova.HpTexture, x, y, iconWidth, iconHeight);
             }
         }
         //Affichage de score
@@ -349,7 +365,7 @@ namespace Drones
         // Affiche le nombre de skids restants
         private void RenderSkidCount(Graphics g)
         {
-            if (Skid._skidImage == null) return;
+            if (Skid.SkidImage == null) return;
 
             int remaining = 0;
             foreach (var drone in fleet) remaining += drone.Charge;
@@ -363,7 +379,7 @@ namespace Drones
             for (int i = 0; i < remaining; i++)
             {
                 int x = startX + i * (iconWidth + spacing);
-                g.DrawImage(Skid._skidImage, x, y, iconWidth, iconHeight);
+                g.DrawImage(Skid.SkidImage, x, y, iconWidth, iconHeight);
             }
         }
 
@@ -428,7 +444,7 @@ namespace Drones
                     if (rockets[i].GetBounds().IntersectsWith(baza.GetBounds()))
                     {
                         AddExplosion((int)rockets[i].X, (int)rockets[i].Y);
-                        baza.setHP(baza.HP - 1);
+                        baza.HP--;
                         rockets.RemoveAt(i);
                         supprime = true;
 
@@ -456,7 +472,7 @@ namespace Drones
                 drone.Update(interval);
                 foreach (var baseAzov in bases)
                     if (drone.GetBounds().IntersectsWith(baseAzov.GetBounds()))
-                        drone.setCharge(3); // recharge quand sur la base
+                        drone.Charge = 3; // recharge quand sur la base
             }
 
             foreach (var enemy in enemies)
@@ -477,7 +493,7 @@ namespace Drones
                         // explosion à l'endroit de l'impact
                         var explosion = new Explosion((int)rockets[i].X, (int)rockets[i].Y);
                         explosions.Add(explosion);
-                        baza.setHP(baza.HP - 1);
+                        baza.HP--;
                         var timer = new System.Windows.Forms.Timer();
                         timer.Interval = 500;
                         timer.Tick += (s2, e2) =>
@@ -548,7 +564,7 @@ namespace Drones
                 {
                     if (skids[i].GetBounds().IntersectsWith(baza.GetBounds()))
                     {
-                        baza.setHP(baza.HP - 1);
+                        baza.HP--;
                         AddExplosion(skids[i].X, skids[i].Y);
                         skids.RemoveAt(i);
                         skidRemoved = true;
@@ -615,7 +631,7 @@ namespace Drones
                 }
 
             }
-            }
+        }
         private void RenderBossHP(Graphics g)
         {
             if (!bossAppeared || bigBoss == null) return;
