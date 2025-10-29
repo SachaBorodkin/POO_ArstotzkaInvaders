@@ -1,0 +1,144 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram id="uml_drones_game_native" name="UML Drones Game">
+    <mxGraphModel dx="679" dy="1504" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="UML_AirSpace" value="&lt;b&gt;AirSpace&lt;/b&gt;&lt;hr/&gt;- ticker : Timer&lt;br/&gt;- score : int&lt;br/&gt;- pressedKeys : HashSet&amp;lt;Keys&amp;gt;&lt;br/&gt;- fleet : List&amp;lt;Drone&amp;gt;&lt;br/&gt;- skids : List&amp;lt;Skid&amp;gt;&lt;br/&gt;- bases : List&amp;lt;BazaAzova&amp;gt;&lt;br/&gt;- enemies : List&amp;lt;Enemy&amp;gt;&lt;br/&gt;- rockets : List&amp;lt;Rocket&amp;gt;&lt;br/&gt;+ {static} WIDTH : int&lt;hr/&gt;+ NewFrame(sender: object, e: EventArgs) : void&lt;br/&gt;- Update(interval: int) : void&lt;br/&gt;- Render() : void&lt;br/&gt;- AddExplosion(x: int, y: int) : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="310" y="-60" width="240" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Drone" value="&lt;b&gt;Drone&lt;/b&gt;&lt;hr/&gt;- _x : int&lt;br/&gt;- _y : int&lt;br/&gt;- _charge : int&lt;hr/&gt;+ X : int {get; set}&lt;br/&gt;+ Charge : int {get; set}&lt;br/&gt;+ Update(interval: int) : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="20" y="100" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Skid" value="&lt;b&gt;Skid&lt;/b&gt;&lt;hr/&gt;- _x : int&lt;br/&gt;- _y : int&lt;br/&gt;+ {static} SkidImage : Image&lt;hr/&gt;+ Update(interval: int) : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="270" y="500" width="180" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Explosion" value="&lt;b&gt;Explosion&lt;/b&gt;&lt;hr/&gt;- _x : int&lt;br/&gt;- _y : int&lt;br/&gt;+ {static} ExplosionImage : Image&lt;hr/&gt;+ Explosion(x: int, y: int)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="730" y="40" width="180" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_BazaAzova" value="&lt;b&gt;BazaAzova&lt;/b&gt;&lt;hr/&gt;- _x : int&lt;br/&gt;- _y : int&lt;br/&gt;- _hp : int&lt;hr/&gt;+ {static} BaseImage : Image&lt;br/&gt;+ HP : int {get; set}&lt;br/&gt;+ TakeDamage() : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+          <mxGeometry x="950" y="180" width="180" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Enemy" value="&lt;b&gt;Enemy&lt;/b&gt;&lt;hr/&gt;- _x : float&lt;br/&gt;- _y : float&lt;br/&gt;- _yCible : float&lt;br/&gt;- _aTire : bool&lt;hr/&gt;+ Update(interval: int, bases: List&amp;lt;BazaAzova&amp;gt;) : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fce5cd;strokeColor=#d6ae71;" parent="1" vertex="1">
+          <mxGeometry x="20" y="310" width="190" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_BigBoss" value="&lt;b&gt;BigBoss&lt;/b&gt;&lt;hr/&gt;- _x : int&lt;br/&gt;- _y : int&lt;br/&gt;- _hp : int&lt;hr/&gt;+ {static} BossTexture : Image&lt;br/&gt;+ HP : int {get; private set}&lt;br/&gt;+ BigBoss(x: int, y: int)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fce5cd;strokeColor=#d6ae71;" parent="1" vertex="1">
+          <mxGeometry x="40" y="490" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Rocket" value="&lt;b&gt;Rocket&lt;/b&gt;&lt;hr/&gt;- _x : float&lt;br/&gt;- _y : float&lt;br/&gt;- _speed : float&lt;br/&gt;- _cible : BazaAzova&lt;hr/&gt;+ Update(interval: int) : void (Guided movement)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#fce5cd;strokeColor=#d6ae71;" parent="1" vertex="1">
+          <mxGeometry x="480" y="490" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="UML_Obstacle" value="&lt;b&gt;Obstacle&lt;/b&gt;&lt;hr/&gt;- _x : float&lt;br/&gt;- _y : float&lt;br/&gt;- _hp : int&lt;br/&gt;- _texture : Image&lt;hr/&gt;+ HP : int {get; private set}&lt;br/&gt;+ Detruit : bool {get; private set}&lt;br/&gt;+ Update(interval: int) : void" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;container=1;collapsible=0;sketch=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="730" y="370" width="180" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="REL_AirSpace_Drone" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Drone" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="220" as="sourcePoint" />
+            <mxPoint x="120" y="220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="260" />
+              <mxPoint x="220" y="260" />
+              <mxPoint x="220" y="285" />
+              <mxPoint x="210" y="285" />
+            </Array>
+            <mxPoint x="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_Skid" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Skid" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="220" as="sourcePoint" />
+            <mxPoint x="340" y="220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="295" />
+              <mxPoint x="420" y="295" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_Explosion" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Explosion" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="220" as="sourcePoint" />
+            <mxPoint x="560" y="220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="295" />
+              <mxPoint x="420" y="270" />
+              <mxPoint x="450" y="270" />
+              <mxPoint x="450" y="295" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_BazaAzova" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_BazaAzova" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="120" as="sourcePoint" />
+            <mxPoint x="780" y="220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="120" />
+              <mxPoint x="550" y="285" />
+              <mxPoint x="680" y="285" />
+              <mxPoint x="680" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_Enemy" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Enemy" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="220" as="sourcePoint" />
+            <mxPoint x="120" y="380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="325" />
+              <mxPoint x="220" y="325" />
+              <mxPoint x="220" y="445" />
+              <mxPoint x="210" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_Rocket" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Rocket" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="220" as="sourcePoint" />
+            <mxPoint x="560" y="380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="370" />
+              <mxPoint x="560" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_AirSpace_Obstacle" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=diamond;startFill=1;startSize=8;strokeColor=#36393d;" parent="1" source="UML_AirSpace" target="UML_Obstacle" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="120" as="sourcePoint" />
+            <mxPoint x="780" y="380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="120" />
+              <mxPoint x="550" y="445" />
+              <mxPoint x="680" y="445" />
+              <mxPoint x="680" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_Rocket_BazaAzova" value="" style="endArrow=open;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#36393d;" parent="1" source="UML_Rocket" target="UML_BazaAzova" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="380" as="sourcePoint" />
+            <mxPoint x="780" y="350" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="560" y="350" />
+              <mxPoint x="780" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_Enemy_BazaAzova" value="" style="endArrow=open;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#36393d;dashed=1;" parent="1" source="UML_Enemy" target="UML_BazaAzova" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="210" y="445" as="sourcePoint" />
+            <mxPoint x="690" y="285" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="230" y="445" />
+              <mxPoint x="230" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="REL_Drone_Skid" value="" style="endArrow=open;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#36393d;dashed=1;" parent="1" source="UML_Drone" target="UML_Skid" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="210" y="285" as="sourcePoint" />
+            <mxPoint x="250" y="285" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
