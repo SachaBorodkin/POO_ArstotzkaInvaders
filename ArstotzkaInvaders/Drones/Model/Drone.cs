@@ -30,7 +30,7 @@ namespace Drones
         // Méthode d'update du drone
         public void Update(int interval)
         {
-        
+
         }
     }
 }
