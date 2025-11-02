@@ -48,3 +48,17 @@ Les valeurs possibles du résultat sont: LA (Largement Acquis), A (Acquis), I (I
 | Comportement individuel    | A        |                                                                                                                                                                                                                                             |
 
 Mis à part l'absence d'obstacles, le code est complet. Il reste un effort important à faire sur  la documentation
+
+## Final
+
+livraison, impeccable
+
+votre rapport est très bon à deux détails près:
+  1. Votre analyse fonctionnelle n'est pas Dans le format demandé. Je vous avais demandé des Yser Story US, vous ne suivez pas ce formalisme dans votre document. Mais l'analyse que vous faites est quand même de bonne qualité.
+  2.  Le diagramme de classe est mal présenté:
+      - il y a beaucoup de lignes qui se croisent, et on n' arrive pas à les suivre
+      - vous avez fait une capture d'écran. J'ai pourtant attiré l'attention de tout le monde sur le fait que cela ne doit pas se faire. Il semble que vous utilisez draw.io. Utilisez sa fonction d'exportation, elle fournit une image propre
+
+le programme est fonctionnel est complet malgré quelques bugs restant. Par exemple, les obstacles ne fonctionnent pas dans tous les sens.
+
+Globalement, c'est un bon projet que vous avez fait là, il est validé.
